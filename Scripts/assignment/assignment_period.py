@@ -210,7 +210,7 @@ class AssignmentPeriod(Period):
         # Move transfer penalty to boarding penalties,
         # a side effect is that it then also affects first boarding
         self._calc_boarding_penalties(5)
-        has_visited = {}
+        has_visited = {} # dict[str (n_transit_zones), array[bool] (n_transit_zones X n_transit_zones)]
         network = self.emme_scenario.get_network()
         transit_zones = {node.label for node in network.nodes()}
         tc = "transit_work"
@@ -239,16 +239,16 @@ class AssignmentPeriod(Period):
             # Add transit zone of destination to visited
             has_visited[centroid.label][:, mapping[centroid.number]] = True
         maxfare = 999
-        cost = numpy.full_like(nr_visits, maxfare)
+        cost = numpy.full_like(nr_visits, maxfare) # Array[int] (n_transit_zones X n_transit_zones)
         mtx = next(iter(has_visited.values()))
         for zone_combination in fares.zone_fares:
-            goes_outside = numpy.full_like(mtx, False)
+            goes_outside = numpy.full_like(mtx, False) # Array[bool] (n_transit_zones X n_transit_zones)
             for transit_zone in has_visited:
                 # Check if the OD-flow has been at a node that is
                 # outside of this zone combination
                 if transit_zone not in zone_combination:
                     goes_outside |= has_visited[transit_zone]
-            is_inside = ~goes_outside
+            is_inside = ~goes_outside # Array[bool] (n_transit_zones X n_transit_zones)
             if zone_combination in fares.exclusive:
                 # Calculate fares exclusive for municipality citizens
                 exclusion = pandas.DataFrame(
@@ -268,9 +268,24 @@ class AssignmentPeriod(Period):
         l, u = zn.slice_locs(bounds[0], bounds[1])
         cost[l:u, :u] = peripheral_cost
         cost[:u, l:u] = peripheral_cost.T
+        # Calculate distance-based cost from inv-distance for different distance-fare zones and choose the minimum
+        # TODO: Must make sure to include an entry with all zones in the .tco representing regular km-based cost.
+        dist = self._get_matrix(tc, "dist") # Array[int] (n_transit_zones X n_transit_zones)
+        for zone_combination in fares.distance_fares:
+            dist_fare = fares.distance_fares[zone_combination]
+            goes_outside = numpy.full_like(mtx, False) # Array[bool] (n_transit_zones X n_transit_zones)
+            for transit_zone in has_visited:
+                # Check if the OD-flow has been at a node that is
+                # outside of this zone combination
+                if transit_zone not in zone_combination:
+                    goes_outside |= has_visited[transit_zone]
+            is_inside = ~goes_outside # Array[bool] (n_transit_zones X n_transit_zones)
+            dist_cost = dist_fare['dist']*dist[is_inside] + dist_fare['start']
+            # If OD-flow matches several combinations, pick cheapest
+            cost[is_inside] = numpy.minimum(cost[is_inside], dist_cost)
         # Calculate distance-based cost from inv-distance
         dist = self._get_matrix(tc, "dist")
-        dist_cost = fares.start_fare + fares.dist_fare*dist
+        dist_cost = fares.default_start_fare + fares.default_dist_fare*dist
         cost[cost>=maxfare] = dist_cost[cost>=maxfare]
         # Reset boarding penalties
         self._calc_boarding_penalties()

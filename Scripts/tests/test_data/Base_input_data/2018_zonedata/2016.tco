@@ -9,33 +9,34 @@
 # start: Matkahuolto 44 trips start fare
 # dist: Matkahuolto 44 trips distance fare
 #
-	fare	exclusive
-JD	46	Jarvenpaa
-AB	59.7
-BC	59.7
-DJ	59.7
-ABC	107.5
-CD	98
-BCD	115.8
-ABCD	156.4
-DNJMP	63
-NA	120
-NB	120
-NC	120
-V	85
-VA	149
-VB	149
-VC	149
-J	35
-JA	130
-JB	130
-JC	87
-MA	168
-MB	168
-MC	142
-MD	121
-PA	252
-PB	252
-PC	252
+	fare	dist	exclusive
+JD	46	0	Jarvenpaa
+AB	59.7	0
+BC	59.7	0
+DJ	59.7	0
+ABC	107.5	0
+CD	98	0
+BCD	115.8	0
+ABCD	156.4	0
+DNJMP	63	0
+NA	120	0
+NB	120	0
+NC	120	0
+V	85	0
+VA	149	0
+VB	149	0
+VC	149	0
+J	35	0
+JA	130	0
+JB	130	0
+JC	87	0
+MA	168	0
+MB	168	0
+MC	142	0
+MD	121	0
+PA	252	0
+PB	252	0
+PC	252	0
+JNVMP	50.2	4.21
 start	57.5
 dist	5.34
