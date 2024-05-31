@@ -269,7 +269,6 @@ class AssignmentPeriod(Period):
         cost[l:u, :u] = peripheral_cost
         cost[:u, l:u] = peripheral_cost.T
         # Calculate distance-based cost from inv-distance for different distance-fare zones and choose the minimum
-        # TODO: Must make sure to include an entry with all zones in the .tco representing regular km-based cost.
         dist = self._get_matrix(tc, "dist") # Array[int] (n_transit_zones X n_transit_zones)
         for zone_combination in fares.distance_fares:
             dist_fare = fares.distance_fares[zone_combination]
@@ -280,7 +279,7 @@ class AssignmentPeriod(Period):
                 if transit_zone not in zone_combination:
                     goes_outside |= has_visited[transit_zone]
             is_inside = ~goes_outside # Array[bool] (n_transit_zones X n_transit_zones)
-            dist_cost = dist_fare['dist']*dist[is_inside] + dist_fare['start']
+            dist_cost = dist_fare['dist']*dist[is_inside] + dist_fare['fare']
             # If OD-flow matches several combinations, pick cheapest
             cost[is_inside] = numpy.minimum(cost[is_inside], dist_cost)
         # Calculate distance-based cost from inv-distance
