@@ -10,6 +10,8 @@ from assignment.mock_assignment import MockAssignmentModel
 from modelsystem import ModelSystem, AgentModelSystem
 from datahandling.matrixdata import MatrixData
 
+# Initial commit
+
 
 def main(args):
     if args.end_assignment_only:
